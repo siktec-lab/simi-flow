@@ -1,6 +1,6 @@
 # SIMI Node.js Bindings
 
-Node.js bindings for the [SIMI](https://github.com/siktec-lab/simi) similarity
+Node.js bindings for the [SIMI](https://github.com/siktec-lab/simi-flow) similarity
 toolkit, powered by napi-rs. SIMI provides eight similarity algorithms and
 a text preprocessing layer.
 
@@ -162,4 +162,4 @@ overhead per call.
 
 ## License
 
-MIT -- see the [LICENSE](https://github.com/siktec-lab/simi/blob/main/LICENSE) file.
+MIT -- see the [LICENSE](https://github.com/siktec-lab/simi-flow/blob/main/LICENSE) file.

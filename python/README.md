@@ -1,6 +1,6 @@
 # SIMI Python Bindings
 
-Python bindings for the [SIMI](https://github.com/siktec-lab/simi) similarity
+Python bindings for the [SIMI](https://github.com/siktec-lab/simi-flow) similarity
 toolkit, powered by PyO3. SIMI provides eight similarity algorithms, a
 composable preprocessing layer, and the SimiFlow routing pipeline.
 
@@ -196,4 +196,4 @@ FFI overhead per call (~50-200 ns).
 
 ## License
 
-MIT -- see the [LICENSE](https://github.com/siktec-lab/simi/blob/main/LICENSE) file.
+MIT -- see the [LICENSE](https://github.com/siktec-lab/simi-flow/blob/main/LICENSE) file.

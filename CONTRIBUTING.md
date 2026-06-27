@@ -5,7 +5,7 @@ Thanks for your interest in contributing. Here is how to get started.
 ## Setup
 
 ```bash
-git clone https://github.com/siktec-lab/simi.git
+git clone https://github.com/siktec-lab/simi-flow.git
 cd simi
 cargo build
 cargo test

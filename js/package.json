@@ -8,11 +8,11 @@
   "homepage": "https://github.com/siktec-lab/simi",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/siktec-lab/simi.git",
+    "url": "git+https://github.com/siktec-lab/simi-flow.git",
     "directory": "js"
   },
   "bugs": {
-    "url": "https://github.com/siktec-lab/simi/issues"
+    "url": "https://github.com/siktec-lab/simi-flow/issues"
   },
   "main": "index.js",
   "types": "index.d.ts",
