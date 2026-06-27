@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # OIDC for PyPI + npm
+  id-token: write  # OIDC for PyPI + npm provenance
 
 jobs:
   # ── crates.io ──────────────────────────────────────────────────
@@ -23,63 +23,159 @@ jobs:
       - name: Publish
         run: cargo publish
 
-  # ── PyPI ────────────────────────────────────────────────────────
-  pypi:
-    name: Build & publish to PyPI
-    runs-on: ubuntu-latest
+  # ── PyPI: build wheels for all platforms + sdist ────────────────
+  pypi-wheels:
+    name: Build wheel (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Build wheel
-        run: |
-          pip install maturin
-          maturin build --release --features python --target ${{ matrix.target }}
-          pip install target/wheels/*.whl
+      - name: Build wheels (maturin)
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --features python --out dist
+          # cross-compile arm64 alongside x86_64 on linux/macos runners
+          target: ${{ runner.os == 'macOS' && 'universal2-apple-darwin' || '' }}
 
+      - name: Build aarch64 linux wheel
+        if: runner.os == 'Linux'
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --features python --out dist
+          target: aarch64-unknown-linux-gnu
+          manylinux: auto
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist
+
+  pypi-sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist
+
+  pypi-publish:
+    name: Publish to PyPI
+    needs: [pypi-wheels, pypi-sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          path: dist
+          merge-multiple: true
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: target/wheels/
+          packages-dir: dist/
 
-  # ── npm ─────────────────────────────────────────────────────────
-  npm:
-    name: Build & publish to npm
-    runs-on: ubuntu-latest
+  # ── npm: build per-platform addons, publish platform packages ───
+  npm-build:
+    name: Build addon (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+          - target: x86_64-apple-darwin
+            runner: macos-latest
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
+      - name: Install cross linker (aarch64 linux)
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+
+      - name: Install JS deps
+        working-directory: js
+        run: npm install
+
+      - name: Build addon
+        working-directory: js
+        run: npx napi build --platform --release --target ${{ matrix.target }} --manifest-path ../Cargo.toml -F nodejs -o .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: js/*.node
+          if-no-files-found: error
+
+  npm-publish:
+    name: Publish to npm
+    needs: npm-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Build addon
+      - name: Install JS deps
+        working-directory: js
+        run: npm install
+
+      - name: Download all built addons
+        uses: actions/download-artifact@v4
+        with:
+          path: js/artifacts
+          pattern: bindings-*
+
+      - name: Generate platform package dirs + move artifacts in
         working-directory: js
         run: |
-          npm install
-          napi build --platform --release --target ${{ matrix.target }} --manifest-path ../Cargo.toml -F nodejs -o .
+          npx napi create-npm-dirs
+          npx napi artifacts --output-dir ./artifacts --npm-dir npm
+          npx napi prepublish -t npm --no-test --skip-gh-release
 
-      - name: Publish
+      - name: Publish platform packages + main package
         working-directory: js
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
-        run: npx napi prepublish -t npm --no-test && npx napi artifacts && npm publish
+        run: |
+          # prepublish only PREPARES the per-platform packages; publish each explicitly
+          for dir in npm/*/; do
+            echo "Publishing $dir"
+            (cd "$dir" && npm publish --access public)
+          done
+          # finally, the main package that depends on them
+          npm publish --access public
