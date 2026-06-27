@@ -1,0 +1,54 @@
+{
+  "name": "@siktec-lab/simi",
+  "version": "0.1.0",
+  "description": "SIMI — a general-purpose toolkit of similarity checks",
+  "keywords": ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf", "napi-rs"],
+  "license": "MIT",
+  "author": "SIKTEC Lab <siktec.lab@gmail.com>",
+  "homepage": "https://github.com/siktec-lab/simi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siktec-lab/simi.git",
+    "directory": "js"
+  },
+  "bugs": {
+    "url": "https://github.com/siktec-lab/simi/issues"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts", "README.md"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "napi": {
+    "binaryName": "simi",
+    "targets": [
+      "x86_64-unknown-linux-gnu",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc"
+    ]
+  },
+  "scripts": {
+    "build": "napi build --platform --release --manifest-path ../Cargo.toml -F nodejs -o .",
+    "build:debug": "napi build --platform --manifest-path ../Cargo.toml -F nodejs -o .",
+    "artifacts": "napi artifacts",
+    "prepublishOnly": "napi prepublish -t npm",
+    "version": "napi version",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3"
+  },
+  "optionalDependencies": {
+    "@siktec-lab/simi-linux-x64-gnu": "0.1.0",
+    "@siktec-lab/simi-linux-arm64-gnu": "0.1.0",
+    "@siktec-lab/simi-darwin-x64": "0.1.0",
+    "@siktec-lab/simi-darwin-arm64": "0.1.0",
+    "@siktec-lab/simi-win32-x64-msvc": "0.1.0"
+  }
+}

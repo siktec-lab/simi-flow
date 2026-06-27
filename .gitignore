@@ -1,0 +1,24 @@
+/target
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+# Built native addons
+*.node
+node_modules/
+package-lock.json
+# Release build outputs
+/dist
+js/artifacts/
+target/wheels/
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+# Library crate: consumers generate their own lock file
+Cargo.lock
+# Spec document (source of truth for implementation, not part of the crate)
+spec.md

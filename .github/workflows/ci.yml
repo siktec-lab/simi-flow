@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  # ── Rust: core library + test suite ──────────────────────────────
+  test-rust:
+    name: Rust (stable)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Clippy (no warnings)
+        run: cargo clippy -- -D warnings
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Test
+        run: cargo test --verbose
+
+  # ── Feature-gate checks ─────────────────────────────────────────
+  test-features:
+    name: Feature gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: default features check
+        run: cargo check
+
+      - name: all features check
+        run: cargo check --all-features
+
+  # ── Python bindings ─────────────────────────────────────────────
+  test-python:
+    name: Python (PyO3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install maturin + pytest
+        run: pip install maturin pytest
+
+      - name: Build wheel
+        run: maturin build --release --features python
+
+      - name: Install wheel
+        run: pip install target/wheels/*.whl
+
+      - name: Run Python tests
+        run: pytest python/tests/ -v
+
+  # ── Node.js bindings ────────────────────────────────────────────
+  test-node:
+    name: Node.js (napi-rs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install JS deps (napi-rs CLI v3)
+        working-directory: js
+        run: npm install
+
+      - name: Build addon
+        working-directory: js
+        run: npm run build
+
+      - name: Run Node.js tests
+        working-directory: js
+        run: node test.js

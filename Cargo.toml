@@ -1,0 +1,62 @@
+[package]
+name = "simi"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+description = "A general-purpose toolkit of similarity checks: protect developers from wasting compute on LLMs for simple tasks"
+authors = ["SIKTEC Lab <siktec.lab@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/siktec-lab/simi"
+homepage = "https://github.com/siktec-lab/simi"
+documentation = "https://docs.rs/simi"
+readme = "README.md"
+keywords = ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf"]
+categories = ["algorithms", "science", "text-processing"]
+# Keep the published crate small: ship the library + README,
+# not the language-binding test harnesses, examples, or generated artifacts.
+exclude = [
+    "js/",
+    "python/",
+    "examples/",
+    "scripts/",
+    ".github/",
+    "docs/",
+    "CONTRIBUTING.md",
+]
+
+[lib]
+name = "simi"
+path = "src/lib.rs"
+crate-type = ["lib", "cdylib"]
+
+[features]
+default = ["std"]
+std = []
+python = ["pyo3"]
+nodejs = ["napi", "napi-derive", "napi-build"]
+
+[dependencies]
+thiserror = "2.0"
+rayon = "1.10"
+unicode-normalization = "0.1"
+unicode-segmentation = "1.12"
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+pyo3 = { version = "0.29", features = ["extension-module"], optional = true }
+napi = { version = "3", features = ["napi8", "serde-json"], optional = true }
+napi-derive = { version = "3", optional = true }
+
+[build-dependencies]
+napi-build = { version = "2", optional = true }
+
+[dev-dependencies]
+criterion = "0.8"
+
+[[bench]]
+name = "algorithms"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
