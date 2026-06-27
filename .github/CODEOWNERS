@@ -1,0 +1,10 @@
+# Code owners for simi-flow
+#
+# These owners are requested for review on every pull request and — when
+# "Require review from Code Owners" is enabled on the main branch ruleset —
+# their approval is required before a PR can be merged.
+#
+# Syntax: <path pattern>  <owner(s)>
+
+# Everything in the repo is owned by the maintainer.
+*       @siktec-lab
