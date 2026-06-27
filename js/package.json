@@ -2,7 +2,14 @@
   "name": "@siktec-lab/simi-flow",
   "version": "0.1.0",
   "description": "SIMI — a general-purpose toolkit of similarity checks",
-  "keywords": ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf", "napi-rs"],
+  "keywords": [
+    "similarity",
+    "levenshtein",
+    "jaro-winkler",
+    "bm25",
+    "tf-idf",
+    "napi-rs"
+  ],
   "license": "MIT",
   "author": "SIKTEC Lab <siktec.lab@gmail.com>",
   "homepage": "https://github.com/siktec-lab/simi-flow",
@@ -16,7 +23,11 @@
   },
   "main": "index.js",
   "types": "index.d.ts",
-  "files": ["index.js", "index.d.ts", "README.md"],
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
