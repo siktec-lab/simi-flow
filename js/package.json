@@ -48,7 +48,6 @@
     "build": "napi build --platform --release --manifest-path ../Cargo.toml -F nodejs -o .",
     "build:debug": "napi build --platform --manifest-path ../Cargo.toml -F nodejs -o .",
     "artifacts": "napi artifacts",
-    "prepublishOnly": "napi prepublish -t npm",
     "test": "node test.js"
   },
   "devDependencies": {

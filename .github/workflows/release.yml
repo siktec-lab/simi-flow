@@ -18,9 +18,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Authenticate via OIDC
+        id: auth
         uses: rust-lang/crates-io-auth-action@v1
 
       - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish
 
   # ── PyPI: build wheels for all platforms + sdist ────────────────
@@ -51,9 +54,9 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --features python --out dist
+          args: --release --features python --out dist --zig
           target: aarch64-unknown-linux-gnu
-          manylinux: auto
+          manylinux: 2_17
 
       - uses: actions/upload-artifact@v4
         with:
@@ -164,7 +167,7 @@ jobs:
         run: |
           npx napi create-npm-dirs
           npx napi artifacts --output-dir ./artifacts --npm-dir npm
-          npx napi prepublish -t npm --no-test --skip-gh-release
+          npx napi prepublish -t npm --skip-optional-publish
 
       - name: Publish platform packages + main package
         working-directory: js
