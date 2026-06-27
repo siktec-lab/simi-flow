@@ -79,13 +79,22 @@ lowercase conversion, stopword removal (150+ built-in, or bring your own).
 
 ### Router (`simi::router`)
 
-The SimBouncer pipeline automates algorithm selection by cascading
-through confidence tiers:
+The SimiFlow pipeline automates algorithm selection by cascading
+through confidence tiers, or by selecting the best algorithm via intent:
 
 ```rust
-use simi::router::{SimBouncer, Strategy, Threshold, Algo};
+use simi::router::{SimiFlow, Intent};
 
-let result = SimBouncer::new()
+// Intent-based: pick by data type
+SimiFlow::for_intent(Intent::Names).compare("MARTHA", "MARHTA")?;
+
+// Auto-detect per pair
+SimiFlow::auto().compare(a, b)?;
+
+// Manual tier configuration
+use simi::router::{SimiFlow, Strategy, Threshold, Algo};
+
+let result = SimiFlow::new()
     .preprocess(true)
     .strategy(Strategy::Cascade)
     .tier_1(Algo::JaroWinkler,
@@ -131,9 +140,9 @@ with zero configuration.
 Instead of calling GPT for "are these two company names the same?":
 
 ```rust
-use simi::router::{SimBouncer, Strategy, Threshold, Algo};
+use simi::router::{SimiFlow, Strategy, Threshold, Algo};
 
-let result = SimBouncer::new()
+let result = SimiFlow::new()
     .preprocess(true)
     .tier_1(Algo::JaroWinkler,
         Threshold::GreaterThan(0.95),
@@ -223,7 +232,7 @@ fn main() {
 simi
 ├── algo/       -- 8 similarity algorithms
 ├── preprocess  -- Unicode normalization, whitespace, stopwords
-├── router      -- SimBouncer pipeline builder
+├── router      -- SimiFlow pipeline builder
 ├── batch       -- rayon-based parallel evaluation
 ├── python      -- PyO3 bindings
 └── nodejs      -- napi-rs bindings

@@ -134,10 +134,12 @@ fn bench_batch(c: &mut Criterion) {
 
     let comparator = BatchComparator::new(Algo::Levenshtein);
 
-    g.bench_function("compare_pairs_100", |b| {
-        b.iter(|| {
+    g.bench_function("compare_pairs_100", |bench| {
+        let a = &a;
+        let b = &b;
+        bench.iter(|| {
             comparator
-                .compare_pairs(black_box(&a), black_box(&b))
+                .compare_pairs(black_box(a), black_box(b))
                 .unwrap()
         })
     });

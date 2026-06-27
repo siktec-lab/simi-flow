@@ -257,6 +257,6 @@ tfidf::similarity("the quick brown fox", "the quick blue fox")   -> 0.5..0.7
 | Search relevance, "some words matter more" | BM25 |
 | Document topic comparison, information retrieval | TF-IDF + Cosine |
 
-For an automated selection pipeline, use the **SimBouncer** router, which
+For an automated selection pipeline, use the **SimiFlow** router, which
 cascades through algorithms based on confidence thresholds. See
 [ROUTER.md](ROUTER.md) for details.

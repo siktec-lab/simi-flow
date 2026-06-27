@@ -6,7 +6,7 @@
 use simi::algo::*;
 use simi::batch::BatchComparator;
 use simi::preprocess::Preprocessor;
-use simi::router::{Algo, SimBouncer, Threshold};
+use simi::router::{Algo, SimiFlow, Threshold, Intent, resolve_intent};
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
@@ -289,11 +289,11 @@ fn roundtrip_preprocessor_unicode() {
     assert_eq!(result, "\u{00e9}");
 }
 
-// ─── Router / SimBouncer ───────────────────────────────────────────
+// ─── Router / SimiFlow ───────────────────────────────────────────
 
 #[test]
-fn roundtrip_bouncer_tier_1_match() {
-    let result = SimBouncer::new()
+fn roundtrip_flow_tier_1_match() {
+    let result = SimiFlow::new()
         .tier_1(
             Algo::JaroWinkler,
             Threshold::GreaterThan(0.95),
@@ -307,8 +307,8 @@ fn roundtrip_bouncer_tier_1_match() {
 }
 
 #[test]
-fn roundtrip_bouncer_tier_1_mismatch() {
-    let result = SimBouncer::new()
+fn roundtrip_flow_tier_1_mismatch() {
+    let result = SimiFlow::new()
         .tier_1(
             Algo::Levenshtein,
             Threshold::GreaterThan(0.95),
@@ -321,8 +321,8 @@ fn roundtrip_bouncer_tier_1_mismatch() {
 }
 
 #[test]
-fn roundtrip_bouncer_tier_2() {
-    let result = SimBouncer::new()
+fn roundtrip_flow_tier_2() {
+    let result = SimiFlow::new()
         .tier_1(
             Algo::Levenshtein,
             Threshold::GreaterThan(0.95),
@@ -336,8 +336,8 @@ fn roundtrip_bouncer_tier_2() {
 }
 
 #[test]
-fn roundtrip_bouncer_fallback_called() {
-    let result = SimBouncer::new()
+fn roundtrip_flow_fallback_called() {
+    let result = SimiFlow::new()
         .tier_1(
             Algo::Levenshtein,
             Threshold::GreaterThan(0.99),
@@ -355,8 +355,8 @@ fn roundtrip_bouncer_fallback_called() {
 }
 
 #[test]
-fn roundtrip_bouncer_preprocessing() {
-    let result = SimBouncer::new()
+fn roundtrip_flow_preprocessing() {
+    let result = SimiFlow::new()
         .preprocess(true)
         .tier_1(
             Algo::Levenshtein,
@@ -369,8 +369,8 @@ fn roundtrip_bouncer_preprocessing() {
 }
 
 #[test]
-fn roundtrip_bouncer_no_tiers_error() {
-    let result = SimBouncer::new().compare("a", "b");
+fn roundtrip_flow_no_tiers_error() {
+    let result = SimiFlow::new().compare("a", "b");
     assert!(result.is_err());
 }
 
@@ -550,4 +550,131 @@ fn roundtrip_unicode_strings() {
     assert_normalized(s);
     let s = jaro_winkler::similarity("café", "café");
     assert!((s - 1.0).abs() < f64::EPSILON);
+}
+
+// ─── Intent / SimiFlow auto ──────────────────────────────────────
+
+#[test]
+fn roundtrip_flow_for_intent_names() {
+    let flow = SimiFlow::for_intent(Intent::Names);
+    let r = flow.compare("MARTHA", "MARHTA").unwrap();
+    assert_eq!(r.algorithm, "jaro_winkler");
+    assert!((r.score - 0.961).abs() < 0.01);
+}
+
+#[test]
+fn roundtrip_flow_for_intent_typos() {
+    let flow = SimiFlow::for_intent(Intent::Typos);
+    let r = flow.compare("kitten", "sitting").unwrap();
+    assert_eq!(r.algorithm, "levenshtein");
+}
+
+#[test]
+fn roundtrip_flow_for_intent_documents() {
+    let flow = SimiFlow::for_intent(Intent::Documents);
+    let r = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+    assert_eq!(r.algorithm, "bm25");
+    assert!(r.score > 0.9);
+}
+
+#[test]
+fn roundtrip_flow_for_intent_deduplication() {
+    let flow = SimiFlow::for_intent(Intent::Deduplication);
+    let r = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+    assert_eq!(r.algorithm, "simhash");
+    assert!(r.score > 0.9);
+}
+
+#[test]
+fn roundtrip_flow_auto_re_resolves() {
+    let flow = SimiFlow::auto();
+    // Short -> Hamming
+    let r = flow.compare("abc", "abc").unwrap();
+    assert_eq!(r.algorithm, "hamming");
+    // Long -> SimHash
+    let long = "x".repeat(600);
+    let r = flow.compare(&long, &long).unwrap();
+    assert_eq!(r.algorithm, "simhash");
+}
+
+#[test]
+fn roundtrip_flow_compare_with_intent() {
+    let flow = SimiFlow::new();
+    for (intent, algo, a, b) in [
+        (Intent::Names, "jaro_winkler", "MARTHA", "MARHTA"),
+        (Intent::Typos, "levenshtein", "kitten", "sitting"),
+        (Intent::Documents, "bm25", "the quick brown fox", "the quick brown fox"),
+        (Intent::Deduplication, "simhash", "hello world", "hello world"),
+    ] {
+        let r = flow.compare_with_intent(intent, a, b).unwrap();
+        assert_eq!(r.algorithm, algo);
+        assert_eq!(r.tier, 0);
+        assert_normalized(r.score);
+    }
+}
+
+#[test]
+fn roundtrip_resolve_intent_consistency() {
+    let pairs = [
+        ("abc", "xyz"),
+        ("hello", "world"),
+        ("the quick brown fox", "the quick brown fox"),
+    ];
+    for (a, b) in pairs {
+        let algo = resolve_intent(Intent::Auto, a, b);
+        let (score, _) = run_algorithm(&algo, a, b).unwrap();
+        assert_normalized(score);
+    }
+}
+
+// ─── Batch with Intent ──────────────────────────────────────────────
+
+#[test]
+fn roundtrip_batch_for_intent_names() {
+    let names: Vec<String> = vec!["MARTHA".into(), "JOHN".into(), "NIKOLA".into()];
+    let refs: Vec<String> = vec!["MARHTA".into(), "JON".into(), "NICOLA".into()];
+    let cmp = BatchComparator::for_intent(Intent::Names);
+    let results = cmp.compare_pairs(&names, &refs).unwrap();
+    assert_eq!(results.len(), 3);
+    for r in &results {
+        assert_normalized(r.score);
+    }
+    assert!(results[0].score > 0.9);
+}
+
+#[test]
+fn roundtrip_batch_for_intent_deduplication_matrix() {
+    let docs: Vec<String> = (0..10).map(|i| format!("doc text number {i} with some content")).collect();
+    let cmp = BatchComparator::for_intent(Intent::Deduplication);
+    let results = cmp.compare_matrix(&docs, &docs).unwrap();
+    assert_eq!(results.len(), 100);
+    for r in &results {
+        assert_normalized(r.score);
+    }
+}
+
+#[test]
+fn roundtrip_batch_auto_one_to_many() {
+    let ref_str = "the quick brown fox".to_string();
+    let candidates: Vec<String> = (0..20).map(|i| format!("candidate text number {i}")).collect();
+    let cmp = BatchComparator::auto();
+    let results = cmp.compare_one_to_many(&ref_str, &candidates).unwrap();
+    assert_eq!(results.len(), 20);
+    for r in &results {
+        assert_normalized(r.score);
+    }
+}
+
+fn run_algorithm(algo: &Algo, a: &str, b: &str) -> Result<(f64, String), simi::SimiError> {
+    use simi::algo::*;
+    match algo {
+        Algo::Levenshtein => Ok((levenshtein::similarity(a, b), "levenshtein".into())),
+        Algo::JaroWinkler => Ok((jaro_winkler::similarity(a, b), "jaro_winkler".into())),
+        Algo::Hamming => hamming::similarity(a, b)
+            .map(|s| (s, "hamming".into()))
+            .ok_or_else(|| simi::SimiError::AlgorithmError("hamming error".into())),
+        Algo::Bm25 => Ok((bm25::similarity(a, b), "bm25".into())),
+        Algo::SimHashDefault => Ok((simhash::compare_default(a, b), "simhash".into())),
+        other => Err(simi::SimiError::AlgorithmError(format!("unsupported: {other:?}"))),
+    }
 }

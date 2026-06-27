@@ -87,7 +87,7 @@ src/
 │   ├── bm25.rs
 │   └── tfidf.rs
 ├── preprocess.rs   String preprocessing
-├── router.rs       SimBouncer pipeline
+├── router.rs       SimiFlow pipeline
 ├── batch.rs        Rayon-based batch processing
 ├── python.rs       Python bindings (PyO3)
 └── nodejs.rs       Node.js bindings (napi-rs)

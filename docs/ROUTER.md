@@ -1,6 +1,6 @@
 # SIMI Router -- The Correct Way to Use SIMI
 
-The SimBouncer is the recommended entry point for most similarity
+The SimiFlow is the recommended entry point for most similarity
 workloads. Instead of picking an algorithm manually and writing fallback
 logic, you declare a pipeline of confidence thresholds and let the
 router cascade through them.
@@ -20,9 +20,9 @@ API hook.
 ## Basic Usage
 
 ```rust
-use simi::router::{SimBouncer, Strategy, Threshold, Algo};
+use simi::router::{SimiFlow, Strategy, Threshold, Algo};
 
-let result = SimBouncer::new()
+let result = SimiFlow::new()
     .strategy(Strategy::Cascade)
     .tier_1(
         Algo::JaroWinkler,
@@ -114,7 +114,7 @@ range."
 Enable preprocessing to normalize inputs before comparison:
 
 ```rust
-SimBouncer::new()
+SimiFlow::new()
     .preprocess(true)
     // ...
 ```
@@ -128,7 +128,7 @@ let pre = Preprocessor::new()
     .with_lowercase(true)
     .with_remove_stopwords(true);
 
-SimBouncer::new()
+SimiFlow::new()
     .with_preprocessor(pre)
     // ...
 ```
@@ -146,7 +146,7 @@ Tier 3 is your escape hatch. Use it for:
 - Running an expensive custom comparison.
 
 ```rust
-SimBouncer::new()
+SimiFlow::new()
     .tier_1(Algo::JaroWinkler,
         Threshold::GreaterThan(0.95),
         Threshold::LessThan(0.10))
@@ -183,7 +183,7 @@ Check `result.tier` to know which tier produced the score. Check
 Only one strategy exists today:
 
 ```rust
-SimBouncer::new()
+SimiFlow::new()
     .strategy(Strategy::Cascade)
 ```
 
@@ -197,7 +197,7 @@ produces a decisive result.
 For comparing user-entered names against a reference database:
 
 ```rust
-SimBouncer::new()
+SimiFlow::new()
     .preprocess(true)
     .tier_1(Algo::JaroWinkler,
         Threshold::GreaterThan(0.95),
@@ -214,7 +214,7 @@ transpositions that Winkler misses.
 For comparing short paragraphs or product descriptions:
 
 ```rust
-SimBouncer::new()
+SimiFlow::new()
     .preprocess(true)
     .tier_1(Algo::JaccardWord,
         Threshold::GreaterThan(0.90),
@@ -261,10 +261,88 @@ If the match threshold is 0.99 and the mismatch threshold is 0.01, almost
 everything cascades to Tier 2 or 3. Set thresholds based on your domain:
 names might need 0.95, but product descriptions might be fine at 0.80.
 
+## Intent-Based Auto-Selection
+
+Instead of picking an algorithm manually, declare what kind of data you
+are comparing and let SIMI select the best algorithm:
+
+```rust
+use simi::router::{SimiFlow, Intent};
+
+// Names → Jaro-Winkler
+SimiFlow::for_intent(Intent::Names).compare("MARTHA", "MARHTA")?;
+
+// Typos → Levenshtein
+SimiFlow::for_intent(Intent::Typos).compare("kitten", "sitting")?;
+
+// Codes → Hamming
+SimiFlow::for_intent(Intent::Codes).compare("hello", "hello")?;
+
+// Documents → BM25
+SimiFlow::for_intent(Intent::Documents).compare("the quick brown fox", "the quick brown fox")?;
+
+// Deduplication → SimHash
+SimiFlow::for_intent(Intent::Deduplication).compare("doc a", "doc b")?;
+```
+
+### Auto Intent
+
+`Intent::Auto` inspects the input lengths and picks the best algorithm
+for each pair at call time:
+
+```rust
+let flow = SimiFlow::auto();
+flow.compare("abc", "abc")?;      // equal, ≤20 → Hamming
+flow.compare("MARTHA", "MARHTA")?; // ≤50 → Jaro-Winkler
+
+// The same flow re-resolves per pair
+let long = "x".repeat(600);
+flow.compare(&long, &long)?;      // >500 → SimHash
+```
+
+**Auto heuristic:**
+| Condition | Algorithm |
+|---|---|
+| Equal length AND max_len ≤ 20 | Hamming |
+| max_len ≤ 50 | Jaro-Winkler |
+| max_len ≤ 500 | BM25 |
+| max_len > 500 | SimHash |
+
+### compare_with_intent
+
+Bypass any configured tiers and run a specific algorithm by intent:
+
+```rust
+let flow = SimiFlow::new()
+    .tier_1(Algo::Levenshtein,
+        Threshold::GreaterThan(0.99),
+        Threshold::LessThan(0.01));
+
+// Ignore the tiers, use Names → Jaro-Winkler
+let result = flow.compare_with_intent(Intent::Names, "MARTHA", "MARHTA")?;
+assert_eq!(result.tier, 0);  // tier 0 = direct intent call
+```
+
+### Batch with Intent
+
+```rust
+use simi::batch::BatchComparator;
+use simi::router::Intent;
+
+let cmp = BatchComparator::for_intent(Intent::Deduplication);
+cmp.compare_matrix(&docs, &docs)?;
+
+// Auto-detect per batch
+let cmp = BatchComparator::auto();
+cmp.compare_pairs(&a, &b)?;
+```
+
 ## Summary
 
-- Use the router when you do not want to pick an algorithm manually.
-- Declare what you are sure about (thresholds), not what algorithm to use.
-- Let the Cascade strategy handle the rest.
-- Keep the router for decision-making; use batch for throughput.
+- Use `SimiFlow::for_intent()` when you know the data type.
+- Use `SimiFlow::auto()` to let SIMI pick per pair.
+- Use `compare_with_intent()` to bypass configured tiers.
+- Use `BatchComparator::for_intent()` for batch with auto-selection.
+- Keep the cascade router for manual threshold control.
 - The fallback is your safety net for truly ambiguous cases.
+

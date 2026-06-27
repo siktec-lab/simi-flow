@@ -26,12 +26,12 @@ println!("{:.3}", j); // ~0.961
 | Sets and Documents | Jaccard, MinHash, SimHash | N-gram sets, large document fingerprints |
 | Statistical Meaning | BM25, TF-IDF + Cosine | Search ranking, term-weighted vectors |
 
-### The LLM Bouncer Pipeline
+### SimiFlow Pipeline
 
 ```rust
-use simi::router::{SimBouncer, Strategy, Threshold, Algo};
+use simi::router::{SimiFlow, Strategy, Threshold, Algo};
 
-let result = SimBouncer::new()
+let result = SimiFlow::new()
     .preprocess(true)
     .strategy(Strategy::Cascade)
     .tier_1(Algo::JaroWinkler, Threshold::GreaterThan(0.95), Threshold::LessThan(0.10))
@@ -97,7 +97,7 @@ npm install @siktec-lab/simi
 simi
 ├── algo/       -- 8 similarity algorithms
 ├── preprocess  -- Unicode normalization, whitespace, stopwords
-├── router      -- SimBouncer pipeline builder
+├── router      -- SimiFlow pipeline builder
 ├── batch       -- rayon-based parallel evaluation
 ├── python      -- PyO3 bindings
 └── nodejs      -- napi-rs bindings

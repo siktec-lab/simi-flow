@@ -4,7 +4,7 @@
 use rayon::prelude::*;
 
 use crate::algo;
-use crate::router::Algo;
+use crate::router::{Algo, Intent, resolve_intent};
 use crate::SimiError;
 
 /// A batch comparison result.
@@ -29,6 +29,37 @@ impl BatchComparator {
     #[inline]
     pub fn new(algorithm: Algo) -> Self {
         Self { algorithm }
+    }
+
+    /// Create a batch comparator pre-configured for a specific intent.
+    ///
+    /// The intent is resolved at construction time (empty strings are used
+    /// for the length heuristic). For `Intent::Auto`, the caller should
+    /// prefer `BatchComparator::auto_per_pair()` or use `new(Algo::*)`.
+    ///
+    /// ```rust
+    /// use simi::batch::BatchComparator;
+    /// use simi::router::Intent;
+    ///
+    /// let docs = vec!["doc a".to_string(), "doc b".to_string()];
+    /// let cmp = BatchComparator::for_intent(Intent::Deduplication);
+    /// let results = cmp.compare_matrix(&docs, &docs).unwrap();
+    /// ```
+    #[inline]
+    pub fn for_intent(intent: Intent) -> Self {
+        let algo = resolve_intent(intent, "", "");
+        Self { algorithm: algo }
+    }
+
+    /// Create a batch comparator that auto-detects the best algorithm.
+    ///
+    /// This uses the empty-string heuristic for construction. For
+    /// per-pair auto-detection, use `SimiFlow::compare_with_intent()`
+    /// or construct a new `BatchComparator` per pair via the length
+    /// heuristic.
+    #[inline]
+    pub fn auto() -> Self {
+        Self::for_intent(Intent::Auto)
     }
 
     /// Compare two arrays element-wise in parallel.
