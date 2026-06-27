@@ -18,7 +18,10 @@ fn main() {
         ("BRITNEY", "BRITTANY"),
     ];
 
-    println!("{:<20} {:<20} {:>12} {:>12}", "Name A", "Name B", "Jaro-Winkler", "Levenshtein");
+    println!(
+        "{:<20} {:<20} {:>12} {:>12}",
+        "Name A", "Name B", "Jaro-Winkler", "Levenshtein"
+    );
     println!("{}", "-".repeat(68));
 
     for (a, b) in pairs {

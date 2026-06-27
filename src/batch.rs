@@ -4,7 +4,7 @@
 use rayon::prelude::*;
 
 use crate::algo;
-use crate::router::{Algo, Intent, resolve_intent};
+use crate::router::{resolve_intent, Algo, Intent};
 use crate::SimiError;
 
 /// A batch comparison result.

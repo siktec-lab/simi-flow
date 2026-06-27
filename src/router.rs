@@ -613,14 +613,18 @@ mod tests {
     #[test]
     fn intent_documents_uses_bm25() {
         let flow = SimiFlow::for_intent(Intent::Documents);
-        let result = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+        let result = flow
+            .compare("the quick brown fox", "the quick brown fox")
+            .unwrap();
         assert_eq!(result.algorithm, "bm25");
     }
 
     #[test]
     fn intent_deduplication_uses_simhash() {
         let flow = SimiFlow::for_intent(Intent::Deduplication);
-        let result = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+        let result = flow
+            .compare("the quick brown fox", "the quick brown fox")
+            .unwrap();
         assert_eq!(result.algorithm, "simhash");
     }
 
@@ -636,7 +640,9 @@ mod tests {
     fn auto_select_medium_picks_jaro_winkler() {
         let flow = SimiFlow::auto();
         // 33 chars, >20 but <=50 → Jaro-Winkler
-        let result = flow.compare("the quick brown fox", "the quick lazy dog").unwrap();
+        let result = flow
+            .compare("the quick brown fox", "the quick lazy dog")
+            .unwrap();
         assert_eq!(result.algorithm, "jaro_winkler");
     }
 
@@ -657,7 +663,9 @@ mod tests {
             Threshold::GreaterThan(0.99),
             Threshold::LessThan(0.01),
         );
-        let result = flow.compare_with_intent(Intent::Names, "MARTHA", "MARHTA").unwrap();
+        let result = flow
+            .compare_with_intent(Intent::Names, "MARTHA", "MARHTA")
+            .unwrap();
         assert_eq!(result.algorithm, "jaro_winkler");
         assert_eq!(result.tier, 0);
     }
@@ -668,8 +676,18 @@ mod tests {
         for (intent, expected_algo, a, b) in [
             (Intent::Names, "jaro_winkler", "MARTHA", "MARHTA"),
             (Intent::Typos, "levenshtein", "kitten", "sitting"),
-            (Intent::Documents, "bm25", "the quick brown fox", "the quick brown fox"),
-            (Intent::Deduplication, "simhash", "hello world", "hello world"),
+            (
+                Intent::Documents,
+                "bm25",
+                "the quick brown fox",
+                "the quick brown fox",
+            ),
+            (
+                Intent::Deduplication,
+                "simhash",
+                "hello world",
+                "hello world",
+            ),
         ] {
             let r = flow.compare_with_intent(intent, a, b).unwrap();
             assert_eq!(r.algorithm, expected_algo, "intent {intent:?}");
@@ -746,8 +764,13 @@ mod tests {
 
     #[test]
     fn for_intent_all_variants_work() {
-        for intent in [Intent::Names, Intent::Typos, Intent::Codes,
-                        Intent::Documents, Intent::Deduplication] {
+        for intent in [
+            Intent::Names,
+            Intent::Typos,
+            Intent::Codes,
+            Intent::Documents,
+            Intent::Deduplication,
+        ] {
             let flow = SimiFlow::for_intent(intent);
             let result = flow.compare("hello", "hello").unwrap();
             assert_normalized(result.score);

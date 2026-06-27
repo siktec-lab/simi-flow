@@ -41,4 +41,4 @@ pub use algo::*;
 pub use batch::BatchComparator;
 pub use error::SimiError;
 pub use preprocess::Preprocessor;
-pub use router::{SimiFlow, Strategy, Threshold, Intent, resolve_intent};
+pub use router::{resolve_intent, Intent, SimiFlow, Strategy, Threshold};

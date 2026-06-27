@@ -6,14 +6,17 @@
 use simi::algo::*;
 use simi::batch::BatchComparator;
 use simi::preprocess::Preprocessor;
-use simi::router::{Algo, SimiFlow, Threshold, Intent, resolve_intent};
+use simi::router::{resolve_intent, Algo, Intent, SimiFlow, Threshold};
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
 /// Assert that a score is `f64`-normalized.
 fn assert_normalized(score: f64) {
     assert!(score.is_finite(), "score must be finite, got {score}");
-    assert!((0.0..=1.0).contains(&score), "score must be in [0,1], got {score}");
+    assert!(
+        (0.0..=1.0).contains(&score),
+        "score must be in [0,1], got {score}"
+    );
 }
 
 /// Two strings that are identical across all algorithms.
@@ -155,7 +158,10 @@ fn roundtrip_minhash_identical() {
 fn roundtrip_minhash_different() {
     let s = minhash::compare_default(DIFFERENT.0, DIFFERENT.1);
     assert_normalized(s);
-    assert!(s < 0.5, "MinHash should score unrelated strings low, got {s}");
+    assert!(
+        s < 0.5,
+        "MinHash should score unrelated strings low, got {s}"
+    );
 }
 
 #[test]
@@ -181,7 +187,10 @@ fn roundtrip_simhash_different() {
     // Assert the score is well below the identical-doc threshold.
     let s = simhash::compare_default("the quick brown fox", "lorem ipsum dolor sit");
     assert_normalized(s);
-    assert!(s < 0.65, "SimHash should score unrelated strings low, got {s}");
+    assert!(
+        s < 0.65,
+        "SimHash should score unrelated strings low, got {s}"
+    );
 }
 
 #[test]
@@ -260,7 +269,10 @@ fn roundtrip_preprocessor_with_stopwords() {
     let p = Preprocessor::default().with_remove_stopwords(true);
     let result = p.process("the quick brown fox");
     // "the" is a standard stopword
-    assert!(!result.contains("the"), "stopword 'the' not removed: {result}");
+    assert!(
+        !result.contains("the"),
+        "stopword 'the' not removed: {result}"
+    );
     assert!(result.contains("quick"), "expected 'quick' in {result}");
 }
 
@@ -572,7 +584,9 @@ fn roundtrip_flow_for_intent_typos() {
 #[test]
 fn roundtrip_flow_for_intent_documents() {
     let flow = SimiFlow::for_intent(Intent::Documents);
-    let r = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+    let r = flow
+        .compare("the quick brown fox", "the quick brown fox")
+        .unwrap();
     assert_eq!(r.algorithm, "bm25");
     assert!(r.score > 0.9);
 }
@@ -580,7 +594,9 @@ fn roundtrip_flow_for_intent_documents() {
 #[test]
 fn roundtrip_flow_for_intent_deduplication() {
     let flow = SimiFlow::for_intent(Intent::Deduplication);
-    let r = flow.compare("the quick brown fox", "the quick brown fox").unwrap();
+    let r = flow
+        .compare("the quick brown fox", "the quick brown fox")
+        .unwrap();
     assert_eq!(r.algorithm, "simhash");
     assert!(r.score > 0.9);
 }
@@ -603,8 +619,18 @@ fn roundtrip_flow_compare_with_intent() {
     for (intent, algo, a, b) in [
         (Intent::Names, "jaro_winkler", "MARTHA", "MARHTA"),
         (Intent::Typos, "levenshtein", "kitten", "sitting"),
-        (Intent::Documents, "bm25", "the quick brown fox", "the quick brown fox"),
-        (Intent::Deduplication, "simhash", "hello world", "hello world"),
+        (
+            Intent::Documents,
+            "bm25",
+            "the quick brown fox",
+            "the quick brown fox",
+        ),
+        (
+            Intent::Deduplication,
+            "simhash",
+            "hello world",
+            "hello world",
+        ),
     ] {
         let r = flow.compare_with_intent(intent, a, b).unwrap();
         assert_eq!(r.algorithm, algo);
@@ -644,7 +670,9 @@ fn roundtrip_batch_for_intent_names() {
 
 #[test]
 fn roundtrip_batch_for_intent_deduplication_matrix() {
-    let docs: Vec<String> = (0..10).map(|i| format!("doc text number {i} with some content")).collect();
+    let docs: Vec<String> = (0..10)
+        .map(|i| format!("doc text number {i} with some content"))
+        .collect();
     let cmp = BatchComparator::for_intent(Intent::Deduplication);
     let results = cmp.compare_matrix(&docs, &docs).unwrap();
     assert_eq!(results.len(), 100);
@@ -656,7 +684,9 @@ fn roundtrip_batch_for_intent_deduplication_matrix() {
 #[test]
 fn roundtrip_batch_auto_one_to_many() {
     let ref_str = "the quick brown fox".to_string();
-    let candidates: Vec<String> = (0..20).map(|i| format!("candidate text number {i}")).collect();
+    let candidates: Vec<String> = (0..20)
+        .map(|i| format!("candidate text number {i}"))
+        .collect();
     let cmp = BatchComparator::auto();
     let results = cmp.compare_one_to_many(&ref_str, &candidates).unwrap();
     assert_eq!(results.len(), 20);
@@ -675,6 +705,8 @@ fn run_algorithm(algo: &Algo, a: &str, b: &str) -> Result<(f64, String), simi::S
             .ok_or_else(|| simi::SimiError::AlgorithmError("hamming error".into())),
         Algo::Bm25 => Ok((bm25::similarity(a, b), "bm25".into())),
         Algo::SimHashDefault => Ok((simhash::compare_default(a, b), "simhash".into())),
-        other => Err(simi::SimiError::AlgorithmError(format!("unsupported: {other:?}"))),
+        other => Err(simi::SimiError::AlgorithmError(format!(
+            "unsupported: {other:?}"
+        ))),
     }
 }

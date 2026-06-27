@@ -1,5 +1,6 @@
-// Version bumper for SIMI (cargo + pyproject + js)
-// Usage: bash scripts/bump-version.sh 0.2.0
+#!/usr/bin/env bash
+# Version bumper for SIMI (cargo + pyproject + js)
+# Usage: bash scripts/bump-version.sh 0.2.0
 
 set -e
 

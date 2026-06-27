@@ -18,7 +18,10 @@ fn build_result_dict(result: crate::router::ComparisonResult) -> PyResult<Py<PyD
         dict.set_item("tier", result.tier)?;
         dict.set_item("algorithm", result.algorithm.as_str())?;
         dict.set_item("fallback_called", result.fallback_called)?;
-        dict.set_item("fallback_data", result.fallback_data.as_deref().unwrap_or(""))?;
+        dict.set_item(
+            "fallback_data",
+            result.fallback_data.as_deref().unwrap_or(""),
+        )?;
         Ok::<_, PyErr>(dict.into())
     })
     .ok_or_else(|| pyo3::exceptions::PyRuntimeError::new_err("No Python interpreter active"))?
@@ -130,36 +133,54 @@ struct PyPreprocessor {
 impl PyPreprocessor {
     #[new]
     fn new() -> Self {
-        Self { inner: crate::preprocess::Preprocessor::default() }
+        Self {
+            inner: crate::preprocess::Preprocessor::default(),
+        }
     }
 
     fn with_lowercase(&self, v: bool) -> Self {
-        Self { inner: self.inner.clone().with_lowercase(v) }
+        Self {
+            inner: self.inner.clone().with_lowercase(v),
+        }
     }
     fn with_collapse_whitespace(&self, v: bool) -> Self {
-        Self { inner: self.inner.clone().with_collapse_whitespace(v) }
+        Self {
+            inner: self.inner.clone().with_collapse_whitespace(v),
+        }
     }
     fn with_trim(&self, v: bool) -> Self {
-        Self { inner: self.inner.clone().with_trim(v) }
+        Self {
+            inner: self.inner.clone().with_trim(v),
+        }
     }
     fn with_normalize_unicode(&self, v: bool) -> Self {
-        Self { inner: self.inner.clone().with_normalize_unicode(v) }
+        Self {
+            inner: self.inner.clone().with_normalize_unicode(v),
+        }
     }
     fn with_remove_stopwords(&self, v: bool) -> Self {
-        Self { inner: self.inner.clone().with_remove_stopwords(v) }
+        Self {
+            inner: self.inner.clone().with_remove_stopwords(v),
+        }
     }
     fn with_stopwords(&self, words: Vec<String>) -> Self {
-        Self { inner: self.inner.clone().with_stopwords(words) }
+        Self {
+            inner: self.inner.clone().with_stopwords(words),
+        }
     }
     fn with_max_length(&self, max: usize) -> Self {
-        Self { inner: self.inner.clone().with_max_length(max) }
+        Self {
+            inner: self.inner.clone().with_max_length(max),
+        }
     }
     fn process(&self, text: &str) -> String {
         self.inner.process(text)
     }
     fn __repr__(&self) -> String {
-        format!("Preprocessor(lowercase={}, stopwords={})",
-            self.inner.to_lowercase, self.inner.remove_stopwords)
+        format!(
+            "Preprocessor(lowercase={}, stopwords={})",
+            self.inner.to_lowercase, self.inner.remove_stopwords
+        )
     }
 }
 
@@ -175,7 +196,7 @@ fn clean_text_stopwords(text: &str) -> String {
 
 // ─── SimiFlow router ──────────────────────────────────────────────────────
 
-use crate::router::{Algo, SimiFlow, Threshold, Intent};
+use crate::router::{Algo, Intent, SimiFlow, Threshold};
 
 fn parse_algo(s: &str) -> PyResult<Algo> {
     match s {
@@ -189,8 +210,9 @@ fn parse_algo(s: &str) -> PyResult<Algo> {
         "simhash_default" => Ok(Algo::SimHashDefault),
         "bm25" => Ok(Algo::Bm25),
         "tfidf" => Ok(Algo::TfIdf),
-        other => Err(pyo3::exceptions::PyValueError::new_err(
-            format!("unknown algorithm: {other}")))
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown algorithm: {other}"
+        ))),
     }
 }
 
@@ -198,8 +220,9 @@ fn parse_threshold(op: &str, val: f64) -> PyResult<Threshold> {
     match op {
         "gt" | "greater_than" => Ok(Threshold::GreaterThan(val)),
         "lt" | "less_than" => Ok(Threshold::LessThan(val)),
-        other => Err(pyo3::exceptions::PyValueError::new_err(
-            format!("unknown threshold op: {other}")))
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown threshold op: {other}"
+        ))),
     }
 }
 
@@ -211,8 +234,9 @@ fn parse_intent(s: &str) -> PyResult<Intent> {
         "documents" => Ok(Intent::Documents),
         "deduplication" | "dedup" => Ok(Intent::Deduplication),
         "auto" => Ok(Intent::Auto),
-        other => Err(pyo3::exceptions::PyValueError::new_err(
-            format!("unknown intent: {other}")))
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown intent: {other}"
+        ))),
     }
 }
 
@@ -237,9 +261,15 @@ impl PySimiFlow {
     fn new() -> Self {
         Self {
             preprocess_enabled: false,
-            tier_1_algo: None, tier_1_match_op: None, tier_1_match_val: None,
-            tier_1_mismatch_op: None, tier_1_mismatch_val: None,
-            tier_2_algo: None, tier_2_op: None, tier_2_val1: None, tier_2_val2: None,
+            tier_1_algo: None,
+            tier_1_match_op: None,
+            tier_1_match_val: None,
+            tier_1_mismatch_op: None,
+            tier_1_mismatch_val: None,
+            tier_2_algo: None,
+            tier_2_op: None,
+            tier_2_val1: None,
+            tier_2_val2: None,
         }
     }
 
@@ -249,8 +279,14 @@ impl PySimiFlow {
         c
     }
 
-    fn tier_1(&self, algo: &str, match_op: &str, match_val: f64,
-              mismatch_op: &str, mismatch_val: f64) -> PyResult<Self> {
+    fn tier_1(
+        &self,
+        algo: &str,
+        match_op: &str,
+        match_val: f64,
+        mismatch_op: &str,
+        mismatch_val: f64,
+    ) -> PyResult<Self> {
         let mut c = self.clone();
         c.tier_1_algo = Some(algo.to_string());
         c.tier_1_match_op = Some(match_op.to_string());
@@ -278,24 +314,42 @@ impl PySimiFlow {
 
     fn compare(&self, a: &str, b: &str) -> PyResult<Py<PyDict>> {
         let mut flow = SimiFlow::new().preprocess(self.preprocess_enabled);
-        if let (Some(algo), Some(match_op), Some(match_val), Some(mismatch_op), Some(mismatch_val)) =
-            (&self.tier_1_algo, &self.tier_1_match_op, self.tier_1_match_val,
-             &self.tier_1_mismatch_op, self.tier_1_mismatch_val)
-        {
+        if let (
+            Some(algo),
+            Some(match_op),
+            Some(match_val),
+            Some(mismatch_op),
+            Some(mismatch_val),
+        ) = (
+            &self.tier_1_algo,
+            &self.tier_1_match_op,
+            self.tier_1_match_val,
+            &self.tier_1_mismatch_op,
+            self.tier_1_mismatch_val,
+        ) {
             let a = parse_algo(algo)?;
-            flow = flow.tier_1(a, parse_threshold(match_op, match_val)?,
-                               parse_threshold(mismatch_op, mismatch_val)?);
+            flow = flow.tier_1(
+                a,
+                parse_threshold(match_op, match_val)?,
+                parse_threshold(mismatch_op, mismatch_val)?,
+            );
         }
-        if let (Some(algo), Some(op), Some(val1), Some(val2)) =
-            (&self.tier_2_algo, &self.tier_2_op, self.tier_2_val1, self.tier_2_val2)
-        {
+        if let (Some(algo), Some(op), Some(val1), Some(val2)) = (
+            &self.tier_2_algo,
+            &self.tier_2_op,
+            self.tier_2_val1,
+            self.tier_2_val2,
+        ) {
             let a = parse_algo(algo)?;
             let thresh = match op.as_str() {
                 "between" => Threshold::Between(val1, val2),
                 "gt" | "greater_than" => Threshold::GreaterThan(val1),
                 "lt" | "less_than" => Threshold::LessThan(val1),
-                other => return Err(pyo3::exceptions::PyValueError::new_err(
-                    format!("unknown threshold op: {other}"))),
+                other => {
+                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                        "unknown threshold op: {other}"
+                    )))
+                }
             };
             flow = flow.tier_2(a, thresh);
         }

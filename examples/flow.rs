@@ -25,7 +25,10 @@ fn main() {
         )
         .tier_2(Algo::Bm25, Threshold::Between(0.30, 0.94))
         .fallback(|a, b| {
-            let score = if a.len() == b.len() && a.chars().zip(b.chars()).filter(|(c, d)| c == d).count() as f64 / a.len() as f64 > 0.5 {
+            let score = if a.len() == b.len()
+                && a.chars().zip(b.chars()).filter(|(c, d)| c == d).count() as f64 / a.len() as f64
+                    > 0.5
+            {
                 0.75
             } else {
                 0.25
@@ -33,7 +36,10 @@ fn main() {
             (score, Some("simulated_llm".into()))
         });
 
-    println!("{:<32} {:<32} {:>8} {:>6} {:>20}", "String A", "String B", "Score", "Tier", "Algorithm");
+    println!(
+        "{:<32} {:<32} {:>8} {:>6} {:>20}",
+        "String A", "String B", "Score", "Tier", "Algorithm"
+    );
     println!("{}", "-".repeat(102));
 
     for (a, b) in pairs {

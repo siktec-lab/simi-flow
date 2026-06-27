@@ -116,9 +116,7 @@ fn bench_stress_long_docs(c: &mut Criterion) {
             |bench, _| {
                 let aa = &a;
                 let bb = &b;
-                bench.iter(|| {
-                    simi::algo::levenshtein::similarity(black_box(aa), black_box(bb))
-                })
+                bench.iter(|| simi::algo::levenshtein::similarity(black_box(aa), black_box(bb)))
             },
         );
 

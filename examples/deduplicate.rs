@@ -44,7 +44,11 @@ fn main() {
 
     println!();
     println!("Total pairs evaluated: {}", results.len());
-    println!("Duplicates found: {}",
-        results.iter().filter(|r| r.score > 0.90 && r.index_a < r.index_b).count()
+    println!(
+        "Duplicates found: {}",
+        results
+            .iter()
+            .filter(|r| r.score > 0.90 && r.index_a < r.index_b)
+            .count()
     );
 }

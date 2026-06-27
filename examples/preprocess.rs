@@ -10,7 +10,10 @@ fn main() {
         ("  The   Quick Brown Fox  ", "the quick brown fox"),
         ("Hello, world!", "hello world"),
         ("\u{0065}\u{0301}t\u{0301}udier", "\u{00e9}tudier"), // decomposed vs precomposed
-        ("the quick brown fox jumps over the lazy dog", "a lazy dog jumps over the quick brown fox"),
+        (
+            "the quick brown fox jumps over the lazy dog",
+            "a lazy dog jumps over the quick brown fox",
+        ),
     ];
 
     let pre = Preprocessor::new()
@@ -19,7 +22,10 @@ fn main() {
         .with_trim(true)
         .with_normalize_unicode(true);
 
-    println!("{:<40} {:<40} {:>12} {:>12}", "Raw A", "Raw B", "Raw Score", "Preproc Score");
+    println!(
+        "{:<40} {:<40} {:>12} {:>12}",
+        "Raw A", "Raw B", "Raw Score", "Preproc Score"
+    );
     println!("{}", "-".repeat(110));
 
     for (a, b) in raw_pairs {
@@ -30,7 +36,10 @@ fn main() {
 
         println!(
             "{:<40} {:<40} {:>12.3} {:>12.3}",
-            truncate(a, 40), truncate(b, 40), raw_score, preproc_score
+            truncate(a, 40),
+            truncate(b, 40),
+            raw_score,
+            preproc_score
         );
     }
 
@@ -59,7 +68,12 @@ fn main() {
         let pa = pre.process(a);
         let pb = pre.process(b);
         let score = bm25::similarity(&pa, &pb);
-        println!("  {:.3}  |  \"{}\"  vs  \"{}\"", score, truncate(&pa, 35), truncate(&pb, 35));
+        println!(
+            "  {:.3}  |  \"{}\"  vs  \"{}\"",
+            score,
+            truncate(&pa, 35),
+            truncate(&pb, 35)
+        );
     }
 }
 
