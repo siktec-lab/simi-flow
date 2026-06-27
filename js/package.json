@@ -5,7 +5,7 @@
   "keywords": ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf", "napi-rs"],
   "license": "MIT",
   "author": "SIKTEC Lab <siktec.lab@gmail.com>",
-  "homepage": "https://github.com/siktec-lab/simi",
+  "homepage": "https://github.com/siktec-lab/simi-flow",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/siktec-lab/simi-flow.git",
