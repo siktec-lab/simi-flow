@@ -1,8 +1,28 @@
-# SIMI Python Bindings
+# SIMI — a Similarity & Text-Analysis Engine for Python
 
-Python bindings for the [SIMI](https://github.com/siktec-lab/simi-flow) similarity
-toolkit, powered by PyO3. SIMI provides eight similarity algorithms, a
-composable preprocessing layer, and the SimiFlow routing pipeline.
+Python bindings for [SIMI](https://github.com/siktec-lab/simi-flow), a production-grade
+similarity and text-analysis toolkit powered by PyO3 — a Rust core with the ergonomics of a
+plain Python module. Use it to build and integrate reliable similarity checks across real
+workloads: **bot/abuse protection, spam & content moderation, record matching, deduplication,
+search ranking, and fuzzy input handling.**
+
+- **8 battle-tested algorithms** behind one clean API (edit distance, name matching, set overlap, document fingerprinting, probabilistic retrieval) — every score normalized to `[0.0, 1.0]`.
+- **SimiFlow routing** — tell it your *intent* (`names`, `typos`, `codes`, `documents`, `dedup`, `auto`) and it picks the right algorithm for you.
+- **Confidence cascade** — resolve clear matches/mismatches with a cheap fast pass and escalate only the ambiguous middle to a heavier algorithm.
+- **Native speed** — algorithm calls run at Rust speed with tiny FFI overhead.
+
+```python
+import simi
+
+sf = simi.SimiFlow()
+# Declare what you're comparing; SIMI routes "names" to Jaro-Winkler and runs it natively.
+sf.compare_with_intent("names", "MARTHA", "MARHTA")
+# {'score': 0.961, 'tier': 0, 'algorithm': 'jaro_winkler', ...}
+```
+
+> **A note on origin.** SIMI grew out of a need to cut the cost, latency, and unpredictability
+> of using an LLM for every "are these the same?" decision. Most of those checks are
+> deterministic and belong in fast, testable local code — which is exactly what SIMI provides.
 
 ## Installation
 
@@ -130,6 +150,13 @@ Available builder options:
 - `with_max_length(int)`
 
 ## SimiFlow Router
+
+The headline feature. Two ways to use it:
+
+1. **Intent routing** (`compare_with_intent`) — say what you're comparing, get the right algorithm.
+2. **Cascade** (`tier_1` → `tier_2`) — answer confident cases with a cheap algorithm, escalate
+   only the ambiguous middle to a heavier local pass. You inspect the result `tier` to see how
+   often the expensive path runs — and route those few gray-zone cases to your own LLM call.
 
 The router cascades through algorithms based on confidence thresholds,
 avoiding expensive computation until it is actually needed:

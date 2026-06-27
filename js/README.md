@@ -1,8 +1,29 @@
-# SIMI Node.js Bindings
+# SIMI — a Similarity & Text-Analysis Engine for Node.js
 
-Node.js bindings for the [SIMI](https://github.com/siktec-lab/simi-flow) similarity
-toolkit, powered by napi-rs. SIMI provides eight similarity algorithms and
-a text preprocessing layer.
+Node.js bindings for [SIMI](https://github.com/siktec-lab/simi-flow), a production-grade
+similarity and text-analysis toolkit powered by napi-rs — a pure-Rust core exposed as a
+zero-dependency native addon. It gives your Node app **8 battle-tested algorithms** behind one
+clean API, each returning a normalized `[0.0, 1.0]` score and running in **nanoseconds to
+microseconds**.
+
+Use it across real workloads: **bot/abuse protection, spam & content moderation, record
+matching, deduplication, search ranking, and fuzzy input handling** — clustering near-duplicate
+submissions, reconciling records, or pre-filtering candidates with fast, deterministic checks.
+
+```javascript
+const simi = require('@siktec-lab/simi-flow');
+
+// Native, sub-microsecond, no network round-trip.
+simi.jaro_winkler_similarity('MARTHA', 'MARHTA');  // 0.961
+```
+
+- **⚡ Native speed** — Rust core, minimal FFI overhead. See [Performance](#performance).
+- **🧰 8 algorithms, one API** — edit distance, name matching, set overlap, document fingerprinting, probabilistic retrieval.
+- **🌍 Prebuilt binaries** — ships native addons for Linux, macOS (Intel + Apple Silicon), and Windows. No compiler needed.
+
+> **Looking for intent-based routing (SimiFlow)?** The routing pipeline currently ships in the
+> [Rust crate](https://crates.io/crates/simi-flow) and [Python package](https://pypi.org/project/simi-flow/).
+> The Node.js binding exposes the full set of algorithm and preprocessing functions documented below.
 
 ## Installation
 
@@ -113,7 +134,7 @@ simi.clean_text_stopwords('the quick brown fox');     // 'quick brown fox'
 
 `clean_text` applies: Unicode NFC normalization, lowercase, whitespace
 collapse, and trimming. `clean_text_stopwords` does the same plus removes
-150+ common English stopwords.
+180+ common English stopwords.
 
 ## Performance
 
