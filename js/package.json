@@ -1,5 +1,5 @@
 {
-  "name": "@siktec-lab/simi",
+  "name": "@siktec-lab/simi-flow",
   "version": "0.1.0",
   "description": "SIMI — a general-purpose toolkit of similarity checks",
   "keywords": ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf", "napi-rs"],
@@ -45,10 +45,10 @@
     "@napi-rs/cli": "^3"
   },
   "optionalDependencies": {
-    "@siktec-lab/simi-linux-x64-gnu": "0.1.0",
-    "@siktec-lab/simi-linux-arm64-gnu": "0.1.0",
-    "@siktec-lab/simi-darwin-x64": "0.1.0",
-    "@siktec-lab/simi-darwin-arm64": "0.1.0",
-    "@siktec-lab/simi-win32-x64-msvc": "0.1.0"
+    "@siktec-lab/simi-flow-linux-x64-gnu": "0.1.0",
+    "@siktec-lab/simi-flow-linux-arm64-gnu": "0.1.0",
+    "@siktec-lab/simi-flow-darwin-x64": "0.1.0",
+    "@siktec-lab/simi-flow-darwin-arm64": "0.1.0",
+    "@siktec-lab/simi-flow-win32-x64-msvc": "0.1.0"
   }
 }

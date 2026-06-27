@@ -33,17 +33,17 @@ let j = jaro_winkler::similarity("MARTHA", "MARHTA");
 
 Rust (crates.io):
 ```bash
-cargo add simi
+cargo add simi-flow
 ```
 
 Python (PyPI):
 ```bash
-pip install simi-sim
+pip install simi-flow
 ```
 
 Node.js (npm):
 ```bash
-npm install @siktec-lab/simi
+npm install @siktec-lab/simi-flow
 ```
 
 ## Core Modules

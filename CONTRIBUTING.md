@@ -104,4 +104,4 @@ git tag v0.2.0 && git push --follow-tags
 The tag triggers the Release workflow which publishes to:
 - **crates.io** -- OIDC auth via `rust-lang/crates-io-auth-action`
 - **PyPI** -- `maturin` builds per-platform wheels, published via OIDC
-- **npm** -- `@siktec-lab/simi` plus per-platform packages via OIDC
+- **npm** -- `@siktec-lab/simi-flow` plus per-platform packages via OIDC

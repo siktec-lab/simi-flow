@@ -37,7 +37,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./simi.win32-x64-msvc.node');
           } else {
-            nativeBinding = require('@siktec-lab/simi-win32-x64-msvc');
+            nativeBinding = require('@siktec-lab/simi-flow-win32-x64-msvc');
           }
         } catch (e) {
           loadError = e;
@@ -55,7 +55,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./simi.darwin-x64.node');
           } else {
-            nativeBinding = require('@siktec-lab/simi-darwin-x64');
+            nativeBinding = require('@siktec-lab/simi-flow-darwin-x64');
           }
         } catch (e) {
           loadError = e;
@@ -67,7 +67,7 @@ switch (platform) {
           if (localFileExisted) {
             nativeBinding = require('./simi.darwin-arm64.node');
           } else {
-            nativeBinding = require('@siktec-lab/simi-darwin-arm64');
+            nativeBinding = require('@siktec-lab/simi-flow-darwin-arm64');
           }
         } catch (e) {
           loadError = e;
@@ -86,7 +86,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./simi.linux-x64-musl.node');
             } else {
-              nativeBinding = require('@siktec-lab/simi-linux-x64-musl');
+              nativeBinding = require('@siktec-lab/simi-flow-linux-x64-musl');
             }
           } catch (e) {
             loadError = e;
@@ -97,7 +97,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./simi.linux-x64-gnu.node');
             } else {
-              nativeBinding = require('@siktec-lab/simi-linux-x64-gnu');
+              nativeBinding = require('@siktec-lab/simi-flow-linux-x64-gnu');
             }
           } catch (e) {
             loadError = e;
@@ -111,7 +111,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./simi.linux-arm64-musl.node');
             } else {
-              nativeBinding = require('@siktec-lab/simi-linux-arm64-musl');
+              nativeBinding = require('@siktec-lab/simi-flow-linux-arm64-musl');
             }
           } catch (e) {
             loadError = e;
@@ -122,7 +122,7 @@ switch (platform) {
             if (localFileExisted) {
               nativeBinding = require('./simi.linux-arm64-gnu.node');
             } else {
-              nativeBinding = require('@siktec-lab/simi-linux-arm64-gnu');
+              nativeBinding = require('@siktec-lab/simi-flow-linux-arm64-gnu');
             }
           } catch (e) {
             loadError = e;

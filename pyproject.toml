@@ -3,7 +3,7 @@ requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "simi-sim"
+name = "simi-flow"
 version = "0.1.0"
 description = "SIMI — a general-purpose toolkit of similarity checks"
 readme = "python/README.md"

@@ -7,7 +7,7 @@ composable preprocessing layer, and the SimiFlow routing pipeline.
 ## Installation
 
 ```bash
-pip install simi-sim
+pip install simi-flow
 ```
 
 Requires Python 3.8 or later.

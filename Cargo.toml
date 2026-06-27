@@ -1,5 +1,5 @@
 [package]
-name = "simi"
+name = "simi-flow"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.80"
@@ -8,7 +8,7 @@ authors = ["SIKTEC Lab <siktec.lab@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/siktec-lab/simi-flow"
 homepage = "https://github.com/siktec-lab/simi-flow"
-documentation = "https://docs.rs/simi"
+documentation = "https://docs.rs/simi-flow"
 readme = "README.md"
 keywords = ["similarity", "levenshtein", "jaro-winkler", "bm25", "tf-idf"]
 categories = ["algorithms", "science", "text-processing"]

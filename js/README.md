@@ -7,7 +7,7 @@ a text preprocessing layer.
 ## Installation
 
 ```bash
-npm install @siktec-lab/simi
+npm install @siktec-lab/simi-flow
 ```
 
 Requires Node.js 18 or later.
@@ -20,7 +20,7 @@ All similarity functions return a normalized score in `[0.0, 1.0]` where
 ### Levenshtein (edit distance)
 
 ```javascript
-const simi = require('@siktec-lab/simi');
+const simi = require('@siktec-lab/simi-flow');
 
 // Raw distance
 simi.levenshtein_distance('kitten', 'sitting');  // 3
