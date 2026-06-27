@@ -1,9 +1,9 @@
 [package]
 name = "simi-flow"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.80"
-description = "A general-purpose toolkit of similarity checks: protect developers from wasting compute on LLMs for simple tasks"
+description = "A production-grade similarity and text-analysis engine: 8 algorithms plus intent-aware routing for matching, dedup, spam, and bot protection"
 authors = ["SIKTEC Lab <siktec.lab@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/siktec-lab/simi-flow"

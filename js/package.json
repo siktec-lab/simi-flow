@@ -1,7 +1,7 @@
 {
   "name": "@siktec-lab/simi-flow",
-  "version": "0.1.0",
-  "description": "SIMI — a general-purpose toolkit of similarity checks",
+  "version": "0.1.1",
+  "description": "SIMI — a similarity and text-analysis engine: 8 native algorithms for matching, dedup, spam, and bot protection",
   "keywords": [
     "similarity",
     "levenshtein",
@@ -55,10 +55,10 @@
     "@napi-rs/cli": "^3"
   },
   "optionalDependencies": {
-    "@siktec-lab/simi-flow-linux-x64-gnu": "0.1.0",
-    "@siktec-lab/simi-flow-linux-arm64-gnu": "0.1.0",
-    "@siktec-lab/simi-flow-darwin-x64": "0.1.0",
-    "@siktec-lab/simi-flow-darwin-arm64": "0.1.0",
-    "@siktec-lab/simi-flow-win32-x64-msvc": "0.1.0"
+    "@siktec-lab/simi-flow-linux-x64-gnu": "0.1.1",
+    "@siktec-lab/simi-flow-linux-arm64-gnu": "0.1.1",
+    "@siktec-lab/simi-flow-darwin-x64": "0.1.1",
+    "@siktec-lab/simi-flow-darwin-arm64": "0.1.1",
+    "@siktec-lab/simi-flow-win32-x64-msvc": "0.1.1"
   }
 }

@@ -168,7 +168,7 @@ stored in `ComparisonResult.fallback_data`.
 ```rust
 pub struct ComparisonResult {
     pub score: f64,                // [0.0, 1.0]
-    pub tier: usize,               // 1, 2, or 3
+    pub tier: usize,               // 0 = direct intent, 1/2 = cascade tiers, 3 = fallback
     pub algorithm: String,         // algorithm name
     pub fallback_called: bool,     // Tier 3 invoked?
     pub fallback_data: Option<String>, // callback metadata

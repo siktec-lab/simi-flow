@@ -1,21 +1,34 @@
-# SIMI -- Similarity Made Intelligent
+# SIMI -- Similarity & Text-Analysis Engine
 
-SIMI is a general-purpose Rust crate for string similarity. It provides
-eight algorithms across three categories, a composable preprocessing
-layer, an automatic routing pipeline, and batched parallel evaluation
-backed by rayon.
+SIMI is a production-grade similarity and text-analysis toolkit with a pure-Rust core and
+bindings for Python and Node.js. It provides eight algorithms across three categories, a
+composable preprocessing layer, the **SimiFlow** intent-aware routing pipeline, and batched
+parallel evaluation backed by rayon — the building blocks for reliable similarity checks across
+many use cases.
+
+## Use Cases
+
+SIMI is designed to be integrated into real systems:
+
+- **Bot & abuse protection** — fingerprint and cluster near-identical submissions or payloads.
+- **Spam & content moderation** — detect reworded duplicates and template spam at scale.
+- **Record matching & entity resolution** — reconcile names, addresses, SKUs, and accounts.
+- **Deduplication** — collapse near-duplicate documents, listings, or tickets.
+- **Search & ranking** — score and order candidates by relevance.
+- **Fuzzy input handling** — tolerate typos and formatting noise in user input.
 
 ## Why SIMI
 
-Developers regularly reach for an LLM to compare two strings, detect
-near-duplicates, or rank documents by relevance. LLMs are expensive and
-slow. Most of these tasks can be solved locally with deterministic
-algorithms.
+Picking the right similarity algorithm and wiring it up correctly for each task is the hard
+part. SIMI does that work for you:
 
-SIMI gives you those algorithms in one library: pick the right tool for
-the data, compose it with preprocessing, let the router cascade through
-confidence tiers, or run thousands of comparisons in parallel on every
-CPU core.
+- **Intent-aware routing.** Tell SimiFlow *what* you're comparing — `names`, `typos`, `codes`, `documents`, `dedup` — and it selects the right algorithm. Or use `auto` and it decides from the input.
+- **A confidence cascade.** Resolve the obvious matches and mismatches with a cheap fast pass, escalate only the ambiguous middle to a heavier local algorithm, and reach a custom hook (an LLM, a DB lookup, a review queue) only when nothing local can decide.
+- **Native throughput.** A single clean API over eight algorithms, plus rayon-backed batch evaluation that scales across every CPU core.
+
+> **A note on origin.** SIMI grew out of a need to cut the cost, latency, and unpredictability
+> of using an LLM for every "are these the same?" decision. Most of those checks are
+> deterministic and belong in fast, testable local code — which is exactly what SIMI provides.
 
 ## Quick Example
 
@@ -75,7 +88,7 @@ let cleaned = Preprocessor::new()
 ```
 
 Operations: Unicode NFC normalization, whitespace collapse, trimming,
-lowercase conversion, stopword removal (150+ built-in, or bring your own).
+lowercase conversion, stopword removal (180+ built-in, or bring your own).
 
 ### Router (`simi::router`)
 
@@ -133,11 +146,12 @@ with zero configuration.
 
 ---
 
-## Use Cases
+## Use Cases in Practice
 
-### Avoiding LLM Calls for Simple Comparisons
+### Record Matching with a Confidence Cascade
 
-Instead of calling GPT for "are these two company names the same?":
+Decide whether two company names refer to the same entity — resolving confident cases
+locally and escalating only the ambiguous ones:
 
 ```rust
 use simi::router::{SimiFlow, Strategy, Threshold, Algo};
@@ -149,7 +163,7 @@ let result = SimiFlow::new()
         Threshold::LessThan(0.10))
     .tier_2(Algo::Bm25, Threshold::Between(0.60, 0.94))
     .fallback(|a, b| {
-        // Only call the LLM as a last resort
+        // Only reached for genuinely ambiguous pairs — your LLM, DB, or review hook
         call_expensive_llm_api(a, b)
     })
     .compare(record_a, record_b)?;
@@ -198,13 +212,15 @@ Identify near-duplicate articles in a content pipeline:
 ```rust
 use simi::algo::simhash;
 
-let fingerprint_a = simhash::compute("article body text...", 4);
-let fingerprint_b = simhash::compute("article body text...", 4);
-
-let similarity = simhash::compare_fingerprints(fingerprint_a, fingerprint_b);
+// Compare two documents directly (shingle size 4)
+let similarity = simhash::compare("article body text...", "article body text...", 4);
 if similarity > 0.90 {
     // Near-duplicate detected
 }
+
+// Or fingerprint once and reuse across many comparisons
+let fp_a = simhash::fingerprint("article body text...", 4);
+let fp_b = simhash::fingerprint("another article...", 4);
 ```
 
 ### CLI Tool Integration

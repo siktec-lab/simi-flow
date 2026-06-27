@@ -4,8 +4,8 @@ build-backend = "maturin"
 
 [project]
 name = "simi-flow"
-version = "0.1.0"
-description = "SIMI — a general-purpose toolkit of similarity checks"
+version = "0.1.1"
+description = "SIMI — a similarity and text-analysis engine: 8 algorithms plus intent-aware routing for matching, dedup, spam, and bot protection"
 readme = "python/README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
