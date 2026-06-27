@@ -24,7 +24,17 @@ jobs:
       - name: Publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: cargo publish
+        run: |
+          # Skip if this exact version is already on crates.io (safe re-runs).
+          meta=$(cargo metadata --no-deps --format-version 1)
+          name=$(echo "$meta" | python3 -c "import sys,json;print(json.load(sys.stdin)['packages'][0]['name'])")
+          version=$(echo "$meta" | python3 -c "import sys,json;print(json.load(sys.stdin)['packages'][0]['version'])")
+          code=$(curl -s -o /dev/null -w "%{http_code}" "https://crates.io/api/v1/crates/$name/$version")
+          if [ "$code" = "200" ]; then
+            echo "$name@$version already published — skipping"
+          else
+            cargo publish
+          fi
 
   # ── PyPI: build wheels for all platforms + sdist ────────────────
   pypi-wheels:
@@ -49,14 +59,18 @@ jobs:
           # cross-compile arm64 alongside x86_64 on linux/macos runners
           target: ${{ runner.os == 'macOS' && 'universal2-apple-darwin' || '' }}
 
+      # aarch64 Linux wheel is best-effort: cross-compiling a pyo3 extension is
+      # finicky, and aarch64-linux users can always install from the sdist.
+      # Don't let it block the release.
       - name: Build aarch64 linux wheel
         if: runner.os == 'Linux'
+        continue-on-error: true
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --features python --out dist --zig
+          args: --release --features python --out dist
           target: aarch64-unknown-linux-gnu
-          manylinux: 2_17
+          manylinux: 2_28
 
       - uses: actions/upload-artifact@v4
         with:
@@ -175,10 +189,22 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
         run: |
-          # prepublish only PREPARES the per-platform packages; publish each explicitly
+          # prepublish only PREPARES the per-platform packages; publish each
+          # explicitly. Skip any (name@version) that already exists so a re-run
+          # after a partial failure is safe.
+          publish_if_new() {
+            local name version
+            name=$(node -p "require('./package.json').name")
+            version=$(node -p "require('./package.json').version")
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "Skip $name@$version (already published)"
+            else
+              npm publish --access public
+            fi
+          }
           for dir in npm/*/; do
-            echo "Publishing $dir"
-            (cd "$dir" && npm publish --access public)
+            echo "== $dir =="
+            (cd "$dir" && publish_if_new)
           done
           # finally, the main package that depends on them
-          npm publish --access public
+          publish_if_new
