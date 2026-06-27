@@ -158,12 +158,19 @@ jobs:
     name: Publish to npm
     needs: npm-build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # OIDC: lets npm exchange a GitHub token for short-lived publish creds
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+
+      # npm OIDC trusted publishing requires npm CLI >= 11.5.1.
+      - name: Upgrade npm to an OIDC-capable version
+        run: npm install -g npm@latest
 
       - name: Install JS deps
         working-directory: js
@@ -184,9 +191,9 @@ jobs:
 
       - name: Publish platform packages + main package
         working-directory: js
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
+        # No NODE_AUTH_TOKEN: npm auto-detects OIDC via id-token and exchanges it
+        # for short-lived credentials. Provenance is emitted automatically for
+        # public repo + public package.
         run: |
           # prepublish only PREPARES the per-platform packages; publish each
           # explicitly. Treat "already published this version" as success so a
