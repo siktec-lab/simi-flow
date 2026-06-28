@@ -1,5 +1,13 @@
 # SIMI — a Similarity & Text-Analysis Engine
 
+[![CI](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml/badge.svg)](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml)
+[![Release](https://github.com/siktec-lab/simi-flow/actions/workflows/release.yml/badge.svg)](https://github.com/siktec-lab/simi-flow/actions/workflows/release.yml)
+[![crates.io](https://img.shields.io/crates/v/simi-flow.svg?logo=rust)](https://crates.io/crates/simi-flow)
+[![docs.rs](https://img.shields.io/docsrs/simi-flow?logo=docs.rs)](https://docs.rs/simi-flow)
+[![PyPI](https://img.shields.io/pypi/v/simi-flow.svg?logo=pypi&logoColor=white)](https://pypi.org/project/simi-flow/)
+[![npm](https://img.shields.io/npm/v/@siktec-lab/simi-flow.svg?logo=npm)](https://www.npmjs.com/package/@siktec-lab/simi-flow)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 SIMI is a production-grade similarity and text-analysis toolkit for **Rust, Python, and
 Node.js**. It packages **8 battle-tested algorithms** behind one clean API and adds
 **SimiFlow** — an intent-aware routing pipeline — so you can build and integrate reliable
@@ -27,12 +35,12 @@ let result = SimiFlow::new()
 
 ## Why SIMI
 
-- **🧭 Intent-based routing** — tell SIMI *what* you're comparing (`names`, `typos`, `codes`, `documents`, `dedup`) and it selects the right algorithm. Or use `auto` and let it decide from the input.
-- **🧰 8 algorithms, one API** — edit distance, name matching, set overlap, document fingerprinting, and probabilistic retrieval — all returning a normalized `[0.0, 1.0]` score.
-- **⚡ Native speed** — pure-Rust core with a tuned release profile. Single comparisons land in **nanoseconds to microseconds** (see [Performance](#performance)).
-- **🚀 Batch + parallel** — evaluate thousands of pairs across every CPU core with rayon.
-- **🎯 Composable & tunable** — preprocessing, confidence thresholds, and a tiered cascade with an optional escalation hook for the genuinely ambiguous cases.
-- **🌍 Three languages, one core** — identical algorithms in Rust, Python (PyO3), and Node.js (napi-rs).
+- **Intent-based routing** — tell SIMI *what* you're comparing (`names`, `typos`, `codes`, `documents`, `dedup`) and it selects the right algorithm. Or use `auto` and let it decide from the input.
+- **8 algorithms, one API** — edit distance, name matching, set overlap, document fingerprinting, and probabilistic retrieval — all returning a normalized `[0.0, 1.0]` score.
+- **Native speed** — pure-Rust core with a tuned release profile. Single comparisons land in **nanoseconds to microseconds** (see [Performance](#performance)).
+- **Batch + parallel** — evaluate thousands of pairs across every CPU core with rayon.
+- **Composable & tunable** — preprocessing, confidence thresholds, and a tiered cascade with an optional escalation hook for the genuinely ambiguous cases.
+- **Three languages, one core** — identical algorithms in Rust, Python (PyO3), and Node.js (napi-rs).
 
 > **A note on origin.** SIMI grew out of a need to cut the cost, latency, and unpredictability
 > of throwing an LLM at every "are these the same?" decision. Most of those checks are

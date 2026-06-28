@@ -1,5 +1,10 @@
 # SIMI — a Similarity & Text-Analysis Engine for Python
 
+[![PyPI](https://img.shields.io/pypi/v/simi-flow.svg?logo=pypi&logoColor=white)](https://pypi.org/project/simi-flow/)
+[![Python versions](https://img.shields.io/pypi/pyversions/simi-flow.svg?logo=python&logoColor=white)](https://pypi.org/project/simi-flow/)
+[![CI](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml/badge.svg)](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/siktec-lab/simi-flow/blob/main/LICENSE)
+
 Python bindings for [SIMI](https://github.com/siktec-lab/simi-flow), a production-grade
 similarity and text-analysis toolkit powered by PyO3 — a Rust core with the ergonomics of a
 plain Python module. Use it to build and integrate reliable similarity checks across real

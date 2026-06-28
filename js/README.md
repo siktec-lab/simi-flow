@@ -1,5 +1,9 @@
 # SIMI — a Similarity & Text-Analysis Engine for Node.js
 
+[![npm](https://img.shields.io/npm/v/@siktec-lab/simi-flow.svg?logo=npm)](https://www.npmjs.com/package/@siktec-lab/simi-flow)
+[![CI](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml/badge.svg)](https://github.com/siktec-lab/simi-flow/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/siktec-lab/simi-flow/blob/main/LICENSE)
+
 Node.js bindings for [SIMI](https://github.com/siktec-lab/simi-flow), a production-grade
 similarity and text-analysis toolkit powered by napi-rs — a pure-Rust core exposed as a
 zero-dependency native addon. It gives your Node app **8 battle-tested algorithms** behind one
@@ -17,9 +21,9 @@ const simi = require('@siktec-lab/simi-flow');
 simi.jaro_winkler_similarity('MARTHA', 'MARHTA');  // 0.961
 ```
 
-- **⚡ Native speed** — Rust core, minimal FFI overhead. See [Performance](#performance).
-- **🧰 8 algorithms, one API** — edit distance, name matching, set overlap, document fingerprinting, probabilistic retrieval.
-- **🌍 Prebuilt binaries** — ships native addons for Linux, macOS (Intel + Apple Silicon), and Windows. No compiler needed.
+- **Native speed** — Rust core, minimal FFI overhead. See [Performance](#performance).
+- **8 algorithms, one API** — edit distance, name matching, set overlap, document fingerprinting, probabilistic retrieval.
+- **Prebuilt binaries** — ships native addons for Linux, macOS (Intel + Apple Silicon), and Windows. No compiler needed.
 
 > **Looking for intent-based routing (SimiFlow)?** The routing pipeline currently ships in the
 > [Rust crate](https://crates.io/crates/simi-flow) and [Python package](https://pypi.org/project/simi-flow/).
