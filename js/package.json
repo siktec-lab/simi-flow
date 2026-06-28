@@ -1,6 +1,6 @@
 {
   "name": "@siktec-lab/simi-flow",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SIMI — a similarity and text-analysis engine: 8 native algorithms for matching, dedup, spam, and bot protection",
   "keywords": [
     "similarity",
@@ -54,10 +54,10 @@
     "@napi-rs/cli": "^3"
   },
   "optionalDependencies": {
-    "@siktec-lab/simi-flow-linux-x64-gnu": "0.1.1",
-    "@siktec-lab/simi-flow-linux-arm64-gnu": "0.1.1",
-    "@siktec-lab/simi-flow-darwin-x64": "0.1.1",
-    "@siktec-lab/simi-flow-darwin-arm64": "0.1.1",
-    "@siktec-lab/simi-flow-win32-x64-msvc": "0.1.1"
+    "@siktec-lab/simi-flow-linux-x64-gnu": "0.1.2",
+    "@siktec-lab/simi-flow-linux-arm64-gnu": "0.1.2",
+    "@siktec-lab/simi-flow-darwin-x64": "0.1.2",
+    "@siktec-lab/simi-flow-darwin-arm64": "0.1.2",
+    "@siktec-lab/simi-flow-win32-x64-msvc": "0.1.2"
   }
 }
