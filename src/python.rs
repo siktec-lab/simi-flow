@@ -226,6 +226,18 @@ fn parse_threshold(op: &str, val: f64) -> PyResult<Threshold> {
     }
 }
 
+/// Tier-2 thresholds also accept `between` (an inclusive range over two values).
+fn parse_tier2_threshold(op: &str, val1: f64, val2: f64) -> PyResult<Threshold> {
+    match op {
+        "between" => Ok(Threshold::Between(val1, val2)),
+        "gt" | "greater_than" => Ok(Threshold::GreaterThan(val1)),
+        "lt" | "less_than" => Ok(Threshold::LessThan(val1)),
+        other => Err(pyo3::exceptions::PyValueError::new_err(format!(
+            "unknown threshold op: {other}"
+        ))),
+    }
+}
+
 fn parse_intent(s: &str) -> PyResult<Intent> {
     match s {
         "names" => Ok(Intent::Names),
@@ -287,6 +299,10 @@ impl PySimiFlow {
         mismatch_op: &str,
         mismatch_val: f64,
     ) -> PyResult<Self> {
+        // Validate eagerly so typos surface here, not lazily at compare() time.
+        parse_algo(algo)?;
+        parse_threshold(match_op, match_val)?;
+        parse_threshold(mismatch_op, mismatch_val)?;
         let mut c = self.clone();
         c.tier_1_algo = Some(algo.to_string());
         c.tier_1_match_op = Some(match_op.to_string());
@@ -297,6 +313,9 @@ impl PySimiFlow {
     }
 
     fn tier_2(&self, algo: &str, op: &str, val1: f64, val2: f64) -> PyResult<Self> {
+        // Validate eagerly so typos surface here, not lazily at compare() time.
+        parse_algo(algo)?;
+        parse_tier2_threshold(op, val1, val2)?;
         let mut c = self.clone();
         c.tier_2_algo = Some(algo.to_string());
         c.tier_2_op = Some(op.to_string());
@@ -341,16 +360,7 @@ impl PySimiFlow {
             self.tier_2_val2,
         ) {
             let a = parse_algo(algo)?;
-            let thresh = match op.as_str() {
-                "between" => Threshold::Between(val1, val2),
-                "gt" | "greater_than" => Threshold::GreaterThan(val1),
-                "lt" | "less_than" => Threshold::LessThan(val1),
-                other => {
-                    return Err(pyo3::exceptions::PyValueError::new_err(format!(
-                        "unknown threshold op: {other}"
-                    )))
-                }
-            };
+            let thresh = parse_tier2_threshold(op, val1, val2)?;
             flow = flow.tier_2(a, thresh);
         }
         let result = flow.compare(a, b).map_err(to_py_err)?;

@@ -111,7 +111,9 @@ pub fn similarity(a: &str, b: &str) -> f64 {
     let idf = compute_idf(&documents);
     let vec_a = build_vector(&documents[0], &idf);
     let vec_b = build_vector(&documents[1], &idf);
-    cosine_similarity(&vec_a, &vec_b)
+    // `+ 0.0` collapses a possible IEEE-754 negative zero to positive zero so
+    // the public API never returns `-0.0` (which trips strict equality checks).
+    cosine_similarity(&vec_a, &vec_b) + 0.0
 }
 
 /// Tokenize text into lowercase words.
