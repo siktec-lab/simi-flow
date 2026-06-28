@@ -185,7 +185,8 @@ def test_preprocessor_builder():
 
 def test_preprocessor_no_lowercase():
     pre = simi.Preprocessor().with_lowercase(False)
-    assert pre.process("Hello WORLD") == "Hello World"
+    # lowercasing disabled -> case is preserved unchanged
+    assert pre.process("Hello WORLD") == "Hello WORLD"
 
 def test_preprocessor_custom_stopwords():
     pre = simi.Preprocessor() \
@@ -200,9 +201,9 @@ def test_preprocessor_max_length():
 
 def test_preprocessor_unicode():
     pre = simi.Preprocessor().with_normalize_unicode(True)
-    # e + combining acute -> NFC e-acute
-    result = pre.process("\u{0065}\u{0301}")
-    assert result == "\u{00e9}"
+    # e (U+0065) + combining acute (U+0301), NFD input -> NFC e-acute (U+00E9)
+    result = pre.process("é")
+    assert result == "é"
 
 
 # ─── SimiFlow router ─────────────────────────────────────────────
